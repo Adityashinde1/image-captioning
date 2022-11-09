@@ -2,6 +2,7 @@ import shutil
 import sys
 from typing import Dict
 import dill
+import pickle
 import numpy as np
 import yaml
 from zipfile import Path
@@ -23,6 +24,23 @@ class MainUtils:
         except Exception as e:
             raise CustomException(e, sys) from e
 
+    def dump_pickle_file(output_filepath: str, data) -> None: 
+        try:
+            with open(output_filepath, "wb") as encoded_pickle:
+                pickle.dump(data, encoded_pickle)
+
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
+
+    def load_pickle_file(filepath: str) -> object:
+        try:
+            with open(filepath, "rb") as pickle_obj:
+                obj = pickle.load(pickle_obj)
+            return obj
+
+        except Exception as e:
+            raise CustomException(e, sys) from e
 
     def save_numpy_array_data(self, file_path: str, array: np.array) -> str:
         logger.info("Entered the save_numpy_array_data method of MainUtils class")
@@ -112,6 +130,7 @@ class MainUtils:
         except Exception as e:
             raise CustomException(e, sys) from e
 
+
     @staticmethod
     def save_descriptions(descriptions, filename) -> None:
         try:
@@ -124,7 +143,7 @@ class MainUtils:
             file1.write(data)
             file1.close()
             return filename
-            
+
         except Exception as e:
             raise CustomException(e, sys) from e
 

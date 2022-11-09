@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from from_root import from_root
 import os
+from models.inception import Inception
 from src.utils.main_utils import MainUtils
 from src.constant import *
 
@@ -18,18 +19,19 @@ class DataIngestionConfig:
         self.DATA_PATH: str = os.path.join(self.DATA_INGESTION_ARTIFACTS_DIR, UNZIP_FOLDER_NAME)
 
 @dataclass
-class DataTransformationConfig:
+class DataPreprocessingConfig:
     def __init__(self):
         self.UTILS = MainUtils()
-        self.DATA_TRANSFORMATION_ARTIFACTS_DIR: str = os.path.join(from_root(), ARTIFACTS_DIR, DATA_TRANSFORMATION_ARTIFACTS_DIR)
-        self.CLEANED_TRAIN_DESC_PATH: str = os.path.join(self.DATA_TRANSFORMATION_ARTIFACTS_DIR, CLEANED_TRAIN_DESC_FILE_NAME)
-        self.CLEANED_TEST_DESC_PATH: str = os.path.join(self.DATA_TRANSFORMATION_ARTIFACTS_DIR, CLEANED_TEST_DESC_FILE_NAME)
-        self.TRAIN_IMAGE_WITH_PATH: str = os.path.join(self.DATA_TRANSFORMATION_ARTIFACTS_DIR, TRAIN_IMAGE_WITH_PATH)
-        self.TEST_IMAGE_WITH_PATH: str = os.path.join(self.DATA_TRANSFORMATION_ARTIFACTS_DIR, TEST_IMAGE_WITH_PATH)
-        self.TRAIN_IMAGE_WITH_CLEANED_DESC_PATH: str = os.path.join(self.DATA_TRANSFORMATION_ARTIFACTS_DIR, TRAIN_IMAGE_WITH_CLEANED_DESC_NAME)
-        self.TEST_IMAGE_WITH_CLEANED_DESC_PATH: str = os.path.join(self.DATA_TRANSFORMATION_ARTIFACTS_DIR, TEST_IMAGE_WITH_CLEANED_DESC_NAME)
+        self.DATA_PREPROCESSING_ARTIFACTS_DIR: str = os.path.join(from_root(), ARTIFACTS_DIR, DATA_PREPROCESSING_ARTIFACTS_DIR)
+        self.CLEANED_TRAIN_DESC_PATH: str = os.path.join(self.DATA_PREPROCESSING_ARTIFACTS_DIR, CLEANED_TRAIN_DESC_FILE_NAME)
+        self.CLEANED_TEST_DESC_PATH: str = os.path.join(self.DATA_PREPROCESSING_ARTIFACTS_DIR, CLEANED_TEST_DESC_FILE_NAME)
+        self.TRAIN_IMAGE_WITH_PATH: str = os.path.join(self.DATA_PREPROCESSING_ARTIFACTS_DIR, TRAIN_IMAGE_WITH_PATH)
+        self.TEST_IMAGE_WITH_PATH: str = os.path.join(self.DATA_PREPROCESSING_ARTIFACTS_DIR, TEST_IMAGE_WITH_PATH)
+        self.TRAIN_IMAGE_WITH_CLEANED_DESC_PATH: str = os.path.join(self.DATA_PREPROCESSING_ARTIFACTS_DIR, TRAIN_IMAGE_WITH_CLEANED_DESC_NAME)
+        self.TEST_IMAGE_WITH_CLEANED_DESC_PATH: str = os.path.join(self.DATA_PREPROCESSING_ARTIFACTS_DIR, TEST_IMAGE_WITH_CLEANED_DESC_NAME)
 
 @dataclass
 class ModelTrainerConfig:
     def __init__(self):
         self.UTILS = MainUtils()
+        self.INCEPTION = Inception()

@@ -24,10 +24,14 @@ TEST_TOKEN_FILE_NAME = 'test_token.txt'
 TRAIN_IMAGE_NAMES = 'train_img.txt'
 TEST_IMAGE_NAMES = "test_img.txt"
 
-DATA_TRANSFORMATION_ARTIFACTS_DIR = "DataTransformationArtifacts"
+DATA_PREPROCESSING_ARTIFACTS_DIR = "DataPreprocessingArtifacts"
 CLEANED_TRAIN_DESC_FILE_NAME = 'cleaned_train_desc.txt'
 CLEANED_TEST_DESC_FILE_NAME = 'cleaned_test_desc.txt'
 TRAIN_IMAGE_WITH_PATH = 'train_img.txt'
 TEST_IMAGE_WITH_PATH = 'test_img.txt'
 TRAIN_IMAGE_WITH_CLEANED_DESC_NAME = 'train_img_with_cleaned_desc.txt'
 TEST_IMAGE_WITH_CLEANED_DESC_NAME = 'test_img_with_cleaned_desc.txt'
+
+MODEL_TRAINER_ARTIFACTS_DIR = 'ModelTrainerArtifats'
+TRAIN_IMAGE_FEATURE_FILE_NAME = 'encoded_train_images.pkl'
+TEST_IMAGE_FEATURE_FILE_NAME = 'encoded_test_images.pkl'

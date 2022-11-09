@@ -10,7 +10,7 @@ class DataIngestionArtifacts:
     test_image_txt_file_path: str
 
 @dataclass
-class DataTransformationArtifacts:
+class DataPreprocessingArtifacts:
     cleaned_train_desc_path: str
     cleaned_test_desc_path: str
     train_img_path: str
