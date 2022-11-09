@@ -1,17 +1,14 @@
 import os
 import sys
 from src.exception import CustomException
-from zipfile import Path, ZipFile
+from zipfile import ZipFile, Path
 import logging
 from src.entity.config_entity import DataIngestionConfig
 from src.entity.artifacts_entity import DataIngestionArtifacts
 from src.configuration.s3_opearations import S3Operation
 from src.constant import *
-from PIL import Image
-import shutil
 
 logger = logging.getLogger(__name__)
-
 
 class DataIngestion:
     def __init__(self, data_ingestion_config: DataIngestionConfig, data_ingestion_artifacts: DataIngestionArtifacts, S3_operations: S3Operation):
@@ -31,49 +28,53 @@ class DataIngestion:
             raise CustomException(e, sys) from e 
 
 
-    def unzip_file(self, zip_data_filepath: str, unzip_dir_path: str):
+    def unzip_file(self, zip_data_filepath: str, unzip_dir_path: str) -> Path:
         logger.info("Entered the unzip_file method of Data ingestion class")
         try:
             with ZipFile(zip_data_filepath, 'r') as zip_ref:
                 zip_ref.extractall(unzip_dir_path)
             logger.info("Exited the unzip_file method of Data ingestion class")
+            return unzip_dir_path
 
         except Exception as e:
             raise CustomException(e, sys) from e 
 
 
-    def get_tokens_from_s3(self, bucket_name: str, output_file_path: str, key: str) -> None:
+    def get_tokens_from_s3(self, bucket_name: str, output_file_path: str, key: str) -> Path:
         logger.info("Entered the get_tokens_from_s3 method of Data Ingestion class")
         try:
             self.S3_operations.download_file(bucket_name = bucket_name, output_file_path = output_file_path, 
                                                 key = key)
             logger.info("Image tokens file saved") 
             logger.info("Exited the get_tokens_from_s3 method of Data Ingestion class")
+            return output_file_path
 
         except Exception as e:
             raise CustomException(e, sys) from e
 
 
-    def get_train_image_names_from_s3(self, bucket_name: str, output_file_path: str, key: str) -> None:
+    def get_train_image_names_from_s3(self, bucket_name: str, output_file_path: str, key: str) -> Path:
         logger.info("Entered the get_train_image_names_from_s3 method of Data Ingestion class")
         try:
             self.S3_operations.download_file(bucket_name = bucket_name, output_file_path = output_file_path, 
                                                 key = key) 
             logger.info("Train image name file saved") 
             logger.info("Exited the get_train_image_names_from_s3 method of Data Ingestion class")
+            return output_file_path
 
         except Exception as e:
             raise CustomException(e, sys) from e
 
 
-    def get_test_image_names_from_s3(self, bucket_name: str, output_file_path: str, key: str) -> None:
+    def get_test_image_names_from_s3(self, bucket_name: str, output_file_path: str, key: str) -> Path:
         logger.info("Entered the get_test_image_names_from_s3 method of Data Ingestion class")
         try:
             self.S3_operations.download_file(bucket_name = bucket_name, output_file_path = output_file_path, 
                                                 key = key) 
             logger.info("Test image name file saved") 
             logger.info("Exited the get_test_image_names_from_s3 method of Data Ingestion class")
-
+            return output_file_path
+            
         except Exception as e:
             raise CustomException(e, sys) from e
 
@@ -82,13 +83,16 @@ class DataIngestion:
         try:
             # Creating Data Ingestion Artifacts directory inside artifact folder
             os.makedirs(self.data_ingestion_config.DATA_INGESTION_ARTIFACTS_DIR, exist_ok=True)
-
+            logger.info(
+                f"Created {os.path.basename(self.data_ingestion_config.DATA_INGESTION_ARTIFACTS_DIR)} directory."
+            )
+            
             self.get_images_from_s3(bucket_file_name=S3_DATA_FOLDER_NAME, bucket_name=BUCKET_NAME,
                                                output_filepath=self.data_ingestion_config.ZIP_DATA_PATH)
             logger.info("Downloaded images zip file from S3 bucket")
 
             # Unzipping the file
-            image_data_path = self.unzip_file(zip_data_filepath=self.data_ingestion_config.ZIP_DATA_PATH, unzip_dir_path=self.data_ingestion_config.UNZIP_FOLDER_PATH)
+            self.unzip_file(zip_data_filepath=self.data_ingestion_config.ZIP_DATA_PATH, unzip_dir_path=self.data_ingestion_config.UNZIP_FOLDER_PATH)
             logger.info("Extracted the images from the zip file")
 
             # Reading Train image name file from s3 bucket
@@ -110,11 +114,11 @@ class DataIngestion:
             logger.info("got test tokens file from s3 bucket")
 
 
-            data_ingestion_artifacts = DataIngestionArtifacts(image_data_dir=image_data_path,
+            data_ingestion_artifacts = DataIngestionArtifacts(image_data_dir=self.data_ingestion_config.DATA_PATH,
                                                                 train_token_file_path=train_token_path,
                                                                 test_token_file_path=test_token_path,
-                                                                train_image_file_path=train_image_path,
-                                                                test_image_file_path=test_image_path)
+                                                                train_image_txt_file_path=train_image_path,
+                                                                test_image_txt_file_path=test_image_path)
 
             logger.info("Exited the initiate_data_ingestion method of Data Ingestion class ")
             return data_ingestion_artifacts

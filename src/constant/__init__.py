@@ -18,8 +18,16 @@ S3_TRAIN_IMAGE_NAMES = 'Flickr_8k.trainImages.txt'
 S3_TEST_IMAGE_NAMES = 'Flickr_8k.testImages.txt'
 
 DATA_INGESTION_ARTIFACTS_DIR = "DataIngestionArtifacts"
-UNZIP_FOLDER_NAME = 'data'
+UNZIP_FOLDER_NAME = 'data/'
 TRAIN_TOKEN_FILE_NAME = 'train_token.txt'
 TEST_TOKEN_FILE_NAME = 'test_token.txt'
 TRAIN_IMAGE_NAMES = 'train_img.txt'
 TEST_IMAGE_NAMES = "test_img.txt"
+
+DATA_TRANSFORMATION_ARTIFACTS_DIR = "DataTransformationArtifacts"
+CLEANED_TRAIN_DESC_FILE_NAME = 'cleaned_train_desc.txt'
+CLEANED_TEST_DESC_FILE_NAME = 'cleaned_test_desc.txt'
+TRAIN_IMAGE_WITH_PATH = 'train_img.txt'
+TEST_IMAGE_WITH_PATH = 'test_img.txt'
+TRAIN_IMAGE_WITH_CLEANED_DESC_NAME = 'train_img_with_cleaned_desc.txt'
+TEST_IMAGE_WITH_CLEANED_DESC_NAME = 'test_img_with_cleaned_desc.txt'

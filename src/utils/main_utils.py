@@ -3,12 +3,11 @@ import sys
 from typing import Dict
 import dill
 import numpy as np
-import pandas as pd
 import yaml
+from zipfile import Path
 from src.constant import *
 from src.exception import CustomException
 import logging
-from PIL import Image
 
 # initiatlizing logger
 logger = logging.getLogger(__name__)
@@ -99,7 +98,7 @@ class MainUtils:
 
     @staticmethod        
     def read_txt_file(filename: str) -> str:
-        logger.info("Entered the load_doc method of MainUtils class")
+        logger.info("Entered the read_txt_file method of MainUtils class")
         try:
             # Opening file for read only
             file1 = open(filename, 'r')
@@ -107,14 +106,39 @@ class MainUtils:
             text = file1.read()
             # close the file
             file1.close()
-            logger.info("Exited the load_doc method of MainUtils class")
+            logger.info("Exited the read_txt_file method of MainUtils class")
             return text
 
         except Exception as e:
             raise CustomException(e, sys) from e
 
+    @staticmethod
+    def save_descriptions(descriptions, filename) -> None:
+        try:
+            lines = list()
+            for key, desc_list in descriptions.items():
+                for desc in desc_list:
+                    lines.append(key + ' ' + desc)
+            data = '\n'.join(lines)
+            file1 = open(filename, 'w')
+            file1.write(data)
+            file1.close()
+            return filename
+            
+        except Exception as e:
+            raise CustomException(e, sys) from e
 
 
+    @staticmethod
+    def save_txt_file(output_file_path: str, data: list) -> Path: 
+        try:
+            with open(output_file_path, "w") as file:
+                file.writelines("% s\n" % line for line in data)
+
+            return output_file_path
+
+        except Exception as e:
+            raise CustomException(e, sys) from e
 
 
 
