@@ -45,3 +45,4 @@ class ModelTrainerConfig:
         self.MODEL_TRAINER_ARTIFACTS_DIR: str = os.path.join(from_root(), ARTIFACTS_DIR, MODEL_TRAINER_ARTIFACTS_DIR)
         self.TRAIN_FEATURE_PATH: str = os.path.join(self.MODEL_TRAINER_ARTIFACTS_DIR, TRAIN_FEATURE_FILE_NAME)
         self.TEST_FEATURE_PATH: str = os.path.join(self.MODEL_TRAINER_ARTIFACTS_DIR, TEST_FEATURE_FILE_NAME)
+        self.MODEL_WEIGHT_PATH: str = os.path.join(from_root(), MODEL_WEIGHT_DIR_NAME, MODEL_NAME)

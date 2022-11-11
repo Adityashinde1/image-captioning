@@ -9,7 +9,7 @@ __pycache__/
 artifacts
 demo.py
 glove_model.txt
-
+model_weights
 
 # Distribution / packaging
 .Python

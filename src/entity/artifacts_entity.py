@@ -23,4 +23,6 @@ class DataPreprocessingArtifacts:
     
 @dataclass
 class ModelTrainerArtifacts:
-    pass
+    train_image_features_path: str
+    test_image_features_path: str
+    trained_model_path: str    

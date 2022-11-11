@@ -323,7 +323,7 @@ class DataPreprocessing:
             logger.info("Prepared the train and test descriptions")
 
             # Saving the cleaned descriptions to the artifacts directory.
-            prepared_train_description_path = self.data_preprocessing_config.UTILS.dump_pickle_file(output_filepath=self.data_preprocessing_config.PREPARED_TRAIN_DESC_PATH, 
+            self.data_preprocessing_config.UTILS.dump_pickle_file(output_filepath=self.data_preprocessing_config.PREPARED_TRAIN_DESC_PATH, 
                                                                                             data=prepared_train_descriptions)
             logger.info(f"Saved the train descriptions to the artifacts directory. File name - {os.path.basename(self.data_preprocessing_config.PREPARED_TRAIN_DESC_PATH)}")
 
@@ -338,7 +338,7 @@ class DataPreprocessing:
             #print(vocab_dict)
             word_to_index = self.convert_word_to_index(vocab=vocab)
 
-            word_to_index_path = self.data_preprocessing_config.UTILS.dump_pickle_file(output_filepath=self.data_preprocessing_config.WORD_TO_INDEX_PATH, data=word_to_index)
+            self.data_preprocessing_config.UTILS.dump_pickle_file(output_filepath=self.data_preprocessing_config.WORD_TO_INDEX_PATH, data=word_to_index)
 
             vocab_size = len(vocab_dict) + 1   # one for appended 0's
 
@@ -346,16 +346,16 @@ class DataPreprocessing:
 
             embedding_matrix = self.get_dense_vectors(embedding_dim=EMBEDDING_DIM, vocab_size=vocab_size, vocab=vocab)
 
-            embedding_matrix_path = self.data_preprocessing_config.UTILS.dump_pickle_file(output_filepath=self.data_preprocessing_config.EMBEDDING_MATRIX_PATH, 
+            self.data_preprocessing_config.UTILS.dump_pickle_file(output_filepath=self.data_preprocessing_config.EMBEDDING_MATRIX_PATH, 
                                                                                             data=embedding_matrix)
 
             data_preprocessing_artifacts = DataPreprocessingArtifacts(cleaned_train_desc_path=cleaned_train_desc_path,
                                                                         cleaned_test_desc_path=cleaned_test_desc_path,
                                                                         max_length=max_length,
                                                                         vocab_size=vocab_size,
-                                                                        prepared_train_description_path=prepared_train_description_path,
-                                                                        embedding_matrix_path=embedding_matrix_path,
-                                                                        word_to_index_path=word_to_index_path,
+                                                                        prepared_train_description_path=self.data_preprocessing_config.PREPARED_TRAIN_DESC_PATH,
+                                                                        embedding_matrix_path=self.data_preprocessing_config.EMBEDDING_MATRIX_PATH,
+                                                                        word_to_index_path=self.data_preprocessing_config.WORD_TO_INDEX_PATH,
                                                                         train_image_path=self.data_preprocessing_config.TRAIN_IMAGE_WITH_PATH,
                                                                         test_image_path=self.data_preprocessing_config.TEST_IMAGE_WITH_PATH)
 
