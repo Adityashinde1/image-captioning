@@ -13,11 +13,14 @@ class DataIngestionArtifacts:
 class DataPreprocessingArtifacts:
     cleaned_train_desc_path: str
     cleaned_test_desc_path: str
-    train_img_path: str
-    test_img_path: str
-    train_img_with_cleaned_desc: str
-    test_img_with_cleaned_desc: str
-
+    max_length: int
+    vocab_size: int
+    prepared_train_description_path: str
+    embedding_matrix_path: str
+    word_to_index_path: str
+    train_image_path: str
+    test_image_path: str
+    
 @dataclass
 class ModelTrainerArtifacts:
     pass

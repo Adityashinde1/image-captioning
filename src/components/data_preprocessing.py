@@ -2,7 +2,9 @@ import os
 import sys
 import string
 from src.entity.artifacts_entity import DataIngestionArtifacts, DataPreprocessingArtifacts
+from src.configuration.s3_opearations import S3Operation
 from src.exception import CustomException
+from src.constant import *
 from src.entity.config_entity import DataPreprocessingConfig
 from typing import List
 import glob
@@ -12,10 +14,10 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 class DataPreprocessing:
-    def __init__(self, data_preprocessing_config: DataPreprocessingConfig, data_ingestion_artifacts: DataIngestionArtifacts):
+    def __init__(self, data_preprocessing_config: DataPreprocessingConfig, data_ingestion_artifacts: DataIngestionArtifacts, s3_operations: S3Operation):
         self.data_preprocessing_config = data_preprocessing_config
         self.data_ingestion_artifacts = data_ingestion_artifacts
-
+        self.s3_operations = s3_operations
 
     @staticmethod
     def mapping_descriptions_with_image_name(doc) -> dict:
@@ -77,7 +79,7 @@ class DataPreprocessing:
 
 
     @staticmethod
-    def to_vocabulary(descriptions) -> set:
+    def to_vocabulary(descriptions: dict) -> set:
         logger.info("Entered the to_vocabulary method")
         try:
             # build a list of all description strings
@@ -116,22 +118,22 @@ class DataPreprocessing:
         try:
             # Create a list of all image names in the directory
             img = glob.glob(image_path + "*.jpg")
-            # Reading the train image names in a set
-            train_images = set(open(img_txt_file_path, 'r').read().strip().split('\n'))
-            # Create a list of all the training images with their full path names
-            train_img = []
+            # Reading the image names in a set
+            _images = set(open(img_txt_file_path, 'r').read().strip().split('\n'))
+            # Create a list of all the images with their full path names
+            img_ = []
             for i in img: # img is list of full path names of all images
-                if i[len(image_path):] in train_images: # Check if the image belongs to training set
-                    train_img.append(i) # Add it to the list of train image
+                if i[len(image_path):] in _images: # Check if the image belongs to set
+                    img_.append(i) # Add it to the list of image
             logger.info("Exited the get_images method of Data Transforamtion class")
-            return train_img
+            return img_
 
         except Exception as e:
             raise CustomException(e, sys) from e
 
 
     # load clean descriptions into memory
-    def prepare_descriptions(self, filename, dataset) -> dict:
+    def prepare_descriptions(self, filename: str, dataset: str) -> dict:
         logger.info("Entered the prepare_descriptions method of Data Preprocessing class")
         try:
             # load document
@@ -157,6 +159,111 @@ class DataPreprocessing:
         except Exception as e:
             raise CustomException(e, sys) from e
 
+    # We're creating here a list of all the captions
+    def create_caption_list(self, descriptions: dict) -> list:
+        try:
+            all_captions = []
+            for key, val in descriptions.items():
+                for cap in val:
+                    all_captions.append(cap)
+            return all_captions
+
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
+    # Considering only those words which occur at least threshold times in the corpus
+    def create_corpus(self, threshold: int, captions: list) -> list:
+        try:
+            word_counts = {}
+            nsents = 0
+            for sent in captions:
+                nsents += 1
+                for w in sent.split(' '):
+                    word_counts[w] = word_counts.get(w, 0) + 1
+            vocab = [w for w in word_counts if word_counts[w] >= threshold]
+            return vocab
+
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
+    def convert_index_to_word(self, vocab: list) -> dict:
+        try:
+            index_to_word = {}
+            ix = 1
+            for w in vocab:
+                index_to_word[ix] = w
+                ix += 1
+            return index_to_word
+
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
+    def convert_word_to_index(self, vocab: list) -> dict:
+        try:
+            word_to_index = {}
+            ix = 1
+            for w in vocab:
+                word_to_index[w] = ix
+                ix += 1
+            return word_to_index
+
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
+    # converting a dictionary of clean descriptions to a list of descriptions
+    @staticmethod
+    def to_lines(descriptions: dict) -> list:
+        try:
+            all_desc = list()
+            for key in descriptions.keys():
+                [all_desc.append(d) for d in descriptions[key]]
+            return all_desc
+
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
+    # calculating the length of the description with the most words
+    def max_length(self, descriptions: dict) -> int:
+        try:
+            lines = self.to_lines(descriptions)
+            return max(len(d.split()) for d in lines)
+
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
+    def generate_word_vectors(self) -> dict:
+        try:
+            embeddings_index = {}
+            self.s3_operations.download_file(bucket_name=BUCKET_NAME, output_file_path=self.data_preprocessing_config.GLOVE_MODEL_PATH, key=S3_GLOVE_MODEL_NAME)
+            f = open(self.data_preprocessing_config.GLOVE_MODEL_PATH, encoding="utf-8")
+            for line in f:
+                values = line.split()
+                word = values[0]
+                coefs = np.asarray(values[1:], dtype='float32')
+                embeddings_index[word] = coefs
+            f.close()
+            return embeddings_index
+
+        except Exception as e:
+            raise CustomException(e, sys) from e
+
+    def get_dense_vectors(self, embedding_dim: int, vocab_size: int, vocab: list):
+        try:
+            embedding_matrix = np.zeros((vocab_size, embedding_dim))
+            wrd_to_idx = self.convert_word_to_index(vocab=vocab)
+            emb_index = self.generate_word_vectors()
+            for word, i in wrd_to_idx.items():
+                #if i < max_words:
+                embedding_vector = emb_index.get(word)
+                if embedding_vector is not None:
+                    # Words not found in the embedding index will be all zeros
+                    embedding_matrix[i] = embedding_vector
+
+            return embedding_matrix
+
+        except Exception as e:
+            raise CustomException(e, sys) from e      
+
 
     def initiate_data_preprocessing(self) -> DataPreprocessingArtifacts:
         logger.info("Entered the initiate_data_preprocessing method of Data Preprocessing class")
@@ -179,15 +286,15 @@ class DataPreprocessing:
             logger.info("Mapped test descriptions")
 
             # Cleaning the descriptions
-            cleaned_train_mapping = self.clean_descriptions(descriptions=train_mapping)
-            cleaned_test_mapping = self.clean_descriptions(descriptions=test_mapping)
+            cleaned_train_desc = self.clean_descriptions(descriptions=train_mapping)
+            cleaned_test_desc = self.clean_descriptions(descriptions=test_mapping)
             logger.info("Cleaned the train and test descriptions")
 
             # Saving the train and test desacriptions to the artifacts directory
-            cleaned_train_desc_path = self.data_preprocessing_config.UTILS.save_descriptions(descriptions=cleaned_train_mapping, 
+            cleaned_train_desc_path = self.data_preprocessing_config.UTILS.save_descriptions(descriptions=cleaned_train_desc, 
                                                                                                 filename=self.data_preprocessing_config.CLEANED_TRAIN_DESC_PATH)
             logger.info(f"saved the train descriptions to the artifacts directory. File name - {os.path.basename(self.data_preprocessing_config.CLEANED_TRAIN_DESC_PATH)}")
-            cleaned_test_desc_path = self.data_preprocessing_config.UTILS.save_descriptions(descriptions=cleaned_test_mapping, 
+            cleaned_test_desc_path = self.data_preprocessing_config.UTILS.save_descriptions(descriptions=cleaned_test_desc, 
                                                                                                 filename=self.data_preprocessing_config.CLEANED_TEST_DESC_PATH)
             logger.info(f"saved the test descriptions to the artifacts directory. File name - {os.path.basename(self.data_preprocessing_config.CLEANED_TEST_DESC_PATH)}")
 
@@ -197,42 +304,63 @@ class DataPreprocessing:
             logger.info("Loaded train and test image names from txt file")
 
             # Getting Train and Test imagaes from data ingestion artifacst directory
-            train_images = self.get_images(image_path=self.data_ingestion_artifacts.image_data_dir, 
+            train_img = self.get_images(image_path=self.data_ingestion_artifacts.image_data_dir, 
                                                         img_txt_file_path=self.data_ingestion_artifacts.train_image_txt_file_path) 
-            test_images = self.get_images(image_path=self.data_ingestion_artifacts.image_data_dir, 
+            test_img = self.get_images(image_path=self.data_ingestion_artifacts.image_data_dir, 
                                                         img_txt_file_path=self.data_ingestion_artifacts.test_image_txt_file_path)
             logger.info("Got Train and test images")
 
             # saving the train and test images with their full path to artifacts directory
-            train_image_path = self.data_preprocessing_config.UTILS.save_txt_file(output_file_path=self.data_preprocessing_config.TRAIN_IMAGE_WITH_PATH, 
-                                                                                                    data=train_images) 
+            self.data_preprocessing_config.UTILS.dump_pickle_file(output_filepath=self.data_preprocessing_config.TRAIN_IMAGE_WITH_PATH, data=train_img) 
+            
             logger.info(f"Saved train images to the artifacts directory. File name - {os.path.basename(self.data_preprocessing_config.TRAIN_IMAGE_WITH_PATH)}")
-            test_image_path = self.data_preprocessing_config.UTILS.save_txt_file(output_file_path=self.data_preprocessing_config.TEST_IMAGE_WITH_PATH, 
-                                                                                                    data=test_images)
+            self.data_preprocessing_config.UTILS.dump_pickle_file(output_filepath=self.data_preprocessing_config.TEST_IMAGE_WITH_PATH, data=test_img)
             logger.info(f"Saved test images to the artifacts directory. File name - {os.path.basename(self.data_preprocessing_config.TEST_IMAGE_WITH_PATH)}")
 
             # Preparing the cleaned descriptions.
-            train_img_with_cleaned_desc = self.prepare_descriptions(filename=self.data_preprocessing_config.CLEANED_TRAIN_DESC_PATH, dataset=train_image_txt_names)
-            test_img_with_cleaned_desc = self.prepare_descriptions(filename=self.data_preprocessing_config.CLEANED_TEST_DESC_PATH, dataset=test_image_txt_names)
+            prepared_train_descriptions = self.prepare_descriptions(filename=self.data_preprocessing_config.CLEANED_TRAIN_DESC_PATH, dataset=train_image_txt_names)
+            #test_descriptions = self.prepare_descriptions(filename=self.data_preprocessing_config.CLEANED_TEST_DESC_PATH, dataset=test_image_txt_names)
             logger.info("Prepared the train and test descriptions")
 
             # Saving the cleaned descriptions to the artifacts directory.
-            train_img_with_cleaned_desc_path = self.data_preprocessing_config.UTILS.save_txt_file(output_file_path=self.data_preprocessing_config.TRAIN_IMAGE_WITH_CLEANED_DESC_PATH, 
-                                                                                                    data=train_img_with_cleaned_desc)
-            logger.info(f"Saved the train descriptions with image names to the artifacts directory. File name - {os.path.basename(self.data_preprocessing_config.TRAIN_IMAGE_WITH_CLEANED_DESC_PATH)}")
-            test_img_with_cleaned_desc_path = self.data_preprocessing_config.UTILS.save_txt_file(output_file_path=self.data_preprocessing_config.TEST_IMAGE_WITH_CLEANED_DESC_PATH, 
-                                                                                                    data=test_img_with_cleaned_desc)
-            logger.info(f"Saved the test descriptions with image names to the artifacts directory. File name - {os.path.basename(self.data_preprocessing_config.TEST_IMAGE_WITH_CLEANED_DESC_PATH)}")
+            prepared_train_description_path = self.data_preprocessing_config.UTILS.dump_pickle_file(output_filepath=self.data_preprocessing_config.PREPARED_TRAIN_DESC_PATH, 
+                                                                                            data=prepared_train_descriptions)
+            logger.info(f"Saved the train descriptions to the artifacts directory. File name - {os.path.basename(self.data_preprocessing_config.PREPARED_TRAIN_DESC_PATH)}")
 
-            data_transformation_artifacts = DataPreprocessingArtifacts(cleaned_train_desc_path=cleaned_train_desc_path,
+            # logger.info(f"Saved the test descriptions with image names to the artifacts directory. File name - {os.path.basename(self.data_preprocessing_config.TEST_IMAGE_WITH_CLEANED_DESC_PATH)}")
+
+            all_train_captions = self.create_caption_list(descriptions=prepared_train_descriptions)
+
+            vocab = self.create_corpus(threshold=WORD_COUNT_THRESHOLD, captions=all_train_captions)
+            #print(vocab)
+
+            vocab_dict = self.convert_index_to_word(vocab=vocab)
+            #print(vocab_dict)
+            word_to_index = self.convert_word_to_index(vocab=vocab)
+
+            word_to_index_path = self.data_preprocessing_config.UTILS.dump_pickle_file(output_filepath=self.data_preprocessing_config.WORD_TO_INDEX_PATH, data=word_to_index)
+
+            vocab_size = len(vocab_dict) + 1   # one for appended 0's
+
+            max_length = self.max_length(descriptions=prepared_train_descriptions)
+
+            embedding_matrix = self.get_dense_vectors(embedding_dim=EMBEDDING_DIM, vocab_size=vocab_size, vocab=vocab)
+
+            embedding_matrix_path = self.data_preprocessing_config.UTILS.dump_pickle_file(output_filepath=self.data_preprocessing_config.EMBEDDING_MATRIX_PATH, 
+                                                                                            data=embedding_matrix)
+
+            data_preprocessing_artifacts = DataPreprocessingArtifacts(cleaned_train_desc_path=cleaned_train_desc_path,
                                                                         cleaned_test_desc_path=cleaned_test_desc_path,
-                                                                        train_img_path=train_image_path,
-                                                                        test_img_path=test_image_path,
-                                                                        train_img_with_cleaned_desc=train_img_with_cleaned_desc_path,
-                                                                        test_img_with_cleaned_desc=test_img_with_cleaned_desc_path)
+                                                                        max_length=max_length,
+                                                                        vocab_size=vocab_size,
+                                                                        prepared_train_description_path=prepared_train_description_path,
+                                                                        embedding_matrix_path=embedding_matrix_path,
+                                                                        word_to_index_path=word_to_index_path,
+                                                                        train_image_path=self.data_preprocessing_config.TRAIN_IMAGE_WITH_PATH,
+                                                                        test_image_path=self.data_preprocessing_config.TEST_IMAGE_WITH_PATH)
 
             logger.info("Exited the initiate_data_preprocessing method of Data Preprocessing class")
-            return data_transformation_artifacts      
+            return data_preprocessing_artifacts      
 
         except Exception as e:
             raise CustomException(e, sys) from e 

@@ -24,6 +24,8 @@ class MainUtils:
         except Exception as e:
             raise CustomException(e, sys) from e
 
+
+    @staticmethod
     def dump_pickle_file(output_filepath: str, data) -> None: 
         try:
             with open(output_filepath, "wb") as encoded_pickle:
@@ -33,6 +35,7 @@ class MainUtils:
             raise CustomException(e, sys) from e
 
 
+    @staticmethod
     def load_pickle_file(filepath: str) -> object:
         try:
             with open(filepath, "rb") as pickle_obj:
@@ -41,6 +44,7 @@ class MainUtils:
 
         except Exception as e:
             raise CustomException(e, sys) from e
+            
 
     def save_numpy_array_data(self, file_path: str, array: np.array) -> str:
         logger.info("Entered the save_numpy_array_data method of MainUtils class")
