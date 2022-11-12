@@ -145,12 +145,19 @@ class ModelTrainer:
 
             steps = len(train_description) // NUMBER_OF_PICS_PER_BATCH
 
+            print(">>>>>>>>>>>>>>>>>>>>>>>>> Model training started <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
             for epoch in range(EPOCHS):
                 generator = self.data_generator(prepared_descriptions=train_description,image_features=train_image_array, wordtoindex=word_to_index, 
                                                 max_length=self.data_preprocessing_artifacts.max_length,num_of_pics_per_batch=NUMBER_OF_PICS_PER_BATCH, 
                                                 vocab_size=self.data_preprocessing_artifacts.vocab_size)
                 model.fit_generator(generator, epochs=1, steps_per_epoch=steps, verbose=1)
             model.save(self.model_trainer_config.MODEL_WEIGHT_PATH)
+
+            model_trainer_artifacts = ModelTrainerArtifacts(train_image_features_path=self.model_trainer_config.TRAIN_FEATURE_PATH,
+                                                            test_image_features_path=self.model_trainer_config.TEST_FEATURE_PATH,
+                                                            trained_model_path=self.model_trainer_config.MODEL_WEIGHT_PATH)
+
+            return model_trainer_artifacts
 
         except Exception as e:
             raise CustomException(e, sys) from e

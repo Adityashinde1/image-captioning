@@ -26,3 +26,8 @@ class ModelTrainerArtifacts:
     train_image_features_path: str
     test_image_features_path: str
     trained_model_path: str    
+
+@dataclass
+class ModelPusherArtifacts:
+    bucket_name: str
+    s3_model_path: str

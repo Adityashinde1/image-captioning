@@ -11,9 +11,8 @@ from src.constant import *
 logger = logging.getLogger(__name__)
 
 class DataIngestion:
-    def __init__(self, data_ingestion_config: DataIngestionConfig, data_ingestion_artifacts: DataIngestionArtifacts, S3_operations: S3Operation):
+    def __init__(self, data_ingestion_config: DataIngestionConfig, S3_operations: S3Operation):
         self.data_ingestion_config = data_ingestion_config
-        self.data_ingestion_artifacts = data_ingestion_artifacts
         self.S3_operations = S3_operations
 
 

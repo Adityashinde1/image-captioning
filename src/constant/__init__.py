@@ -39,7 +39,7 @@ WORD_COUNT_THRESHOLD = 4
 EMBEDDING_DIM = 200 
 LOSS = "categorical_crossentropy"
 LEARNING_RATE = 0.01
-EPOCHS = 10
+EPOCHS = 100
 NUMBER_OF_PICS_PER_BATCH = 5
 
 MODEL_TRAINER_ARTIFACTS_DIR = 'ModelTrainerArtifats'
@@ -48,3 +48,6 @@ TRAIN_FEATURE_FILE_NAME = 'train_images_features.pkl'
 TEST_FEATURE_FILE_NAME = 'test_images_features.pkl'
 MODEL_WEIGHT_DIR_NAME = 'model_weights'
 MODEL_NAME = 'model.h5'
+
+APP_HOST = "0.0.0.0"
+APP_PORT = 8000

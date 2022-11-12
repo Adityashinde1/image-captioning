@@ -46,3 +46,10 @@ class ModelTrainerConfig:
         self.TRAIN_FEATURE_PATH: str = os.path.join(self.MODEL_TRAINER_ARTIFACTS_DIR, TRAIN_FEATURE_FILE_NAME)
         self.TEST_FEATURE_PATH: str = os.path.join(self.MODEL_TRAINER_ARTIFACTS_DIR, TEST_FEATURE_FILE_NAME)
         self.MODEL_WEIGHT_PATH: str = os.path.join(from_root(), MODEL_WEIGHT_DIR_NAME, MODEL_NAME)
+
+
+@dataclass
+class ModelPusherConfig:
+    def __init__(self):
+        self.S3_MODEL_KEY_PATH: str = os.path.join(MODEL_NAME)
+        self.BUCKET_NAME: str = BUCKET_NAME
