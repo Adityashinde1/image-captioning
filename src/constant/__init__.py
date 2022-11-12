@@ -32,6 +32,7 @@ CLEANED_TEST_DESC_NAME = 'cleaned_test_desc.txt'
 PREPARED_TRAIN_DESC_FILE_NAME = 'prepared_train_desc.pkl'
 EMBEDDING_MATRIX_FILE_NAME = 'embedding_matrix.pkl'
 WORD_TO_INDEX_NAME = 'word_to_index.pkl'
+INDEX_TO_WORD_NAME = 'index_to_word.pkl'
 TRAIN_IMAGE_WITH_PATH_NAME = 'train_img_with_path.pkl'
 TEST_IMAGE_WITH_PATH_NAME = 'test_img_with_path.pkl'
 

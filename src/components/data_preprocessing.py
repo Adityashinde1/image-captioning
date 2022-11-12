@@ -335,7 +335,8 @@ class DataPreprocessing:
             #print(vocab)
 
             vocab_dict = self.convert_index_to_word(vocab=vocab)
-            #print(vocab_dict)
+            self.data_preprocessing_config.UTILS.dump_pickle_file(output_filepath=self.data_preprocessing_config.INDEX_TO_WORD_PATH, data=vocab_dict)
+
             word_to_index = self.convert_word_to_index(vocab=vocab)
 
             self.data_preprocessing_config.UTILS.dump_pickle_file(output_filepath=self.data_preprocessing_config.WORD_TO_INDEX_PATH, data=word_to_index)
@@ -356,6 +357,7 @@ class DataPreprocessing:
                                                                         prepared_train_description_path=self.data_preprocessing_config.PREPARED_TRAIN_DESC_PATH,
                                                                         embedding_matrix_path=self.data_preprocessing_config.EMBEDDING_MATRIX_PATH,
                                                                         word_to_index_path=self.data_preprocessing_config.WORD_TO_INDEX_PATH,
+                                                                        index_to_word_path=self.data_preprocessing_config.INDEX_TO_WORD_PATH,
                                                                         train_image_path=self.data_preprocessing_config.TRAIN_IMAGE_WITH_PATH,
                                                                         test_image_path=self.data_preprocessing_config.TEST_IMAGE_WITH_PATH)
 

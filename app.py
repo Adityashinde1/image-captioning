@@ -7,6 +7,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from src.utils.main_utils import MainUtils
 from src.pipeline.train_pipeline import TrainPipeline
+from src.pipeline.prediction_pipeline import ModelPredictor
+from src.entity.config_entity import ModelPredictorConfig
+from src.entity.artifacts_entity import ModelTrainerArtifacts, DataPreprocessingArtifacts
 from src.constant import *
 
 
@@ -20,6 +23,7 @@ app.add_middleware(
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
+
     allow_headers=["*"],
 )
 
@@ -35,7 +39,27 @@ async def training():
     except Exception as e:
         return Response(f"Error Occurred! {e}")
 
+main_utils = MainUtils()
+prediction_pipeline = ModelPredictor(model_trainer_artifacts=ModelTrainerArtifacts, data_preprocessing_artifacts=DataPreprocessingArtifacts,
+                                         model_predictor_config=ModelPredictorConfig())
 
+@app.post("/predict")
+async def prediction(image_file: bytes = File(description="A file read as bytes")):
+    try:
+
+        #print("chutia", image_file)
+        caption = prediction_pipeline.run_pipeline(image_file)
+        # encoded_image = main_utils.encodeImageIntoBase64(image_file)
+
+        result = {
+            "image": image_file,
+            "caption" : caption
+        }
+
+        return JSONResponse(content=result, status_code=200)
+
+    except Exception as e:
+        JSONResponse(content = f"Error Occurred! {e}", status_code=500)
 
 if __name__ == "__main__":
     app_run(app, host=APP_HOST, port=APP_PORT)

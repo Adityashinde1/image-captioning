@@ -18,6 +18,7 @@ class DataPreprocessingArtifacts:
     prepared_train_description_path: str
     embedding_matrix_path: str
     word_to_index_path: str
+    index_to_word_path: str
     train_image_path: str
     test_image_path: str
     

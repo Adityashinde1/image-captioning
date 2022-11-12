@@ -12,7 +12,7 @@ class CustomModel:
     def __init__(self, data_preprocessing_artifacts: DataPreprocessingArtifacts):
         self.data_preprocessing_artifacts = data_preprocessing_artifacts
 
-    def main_model(self, max_length: int, vocab_size: int, embedding_dim: int, embedding_matrix: np.array) -> object:
+    def main_model(self, max_length: int, vocab_size: int, embedding_dim: int, embedding_matrix: np.array) -> Model:
         try:
             # image feature extractor model
             inputs1 = Input(shape=(2048,))

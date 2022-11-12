@@ -10,6 +10,7 @@ artifacts
 demo.py
 glove_model.txt
 model_weights
+model.h5
 
 # Distribution / packaging
 .Python

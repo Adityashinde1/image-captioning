@@ -5,6 +5,7 @@ import dill
 import pickle
 import numpy as np
 import yaml
+import base64
 from zipfile import Path
 from src.constant import *
 from src.exception import CustomException
@@ -162,6 +163,17 @@ class MainUtils:
 
         except Exception as e:
             raise CustomException(e, sys) from e
+    
+    @staticmethod
+    def decodeImage(imgstring, fileName):
+        imgdata = base64.b64decode(imgstring)
+        with open(fileName, 'wb') as f:
+            f.write(imgdata)
+            f.close()
+
+    @staticmethod
+    def encodeImageIntoBase64(image_bytes: bytes):
+            return base64.b64encode(image_bytes)
 
 
 

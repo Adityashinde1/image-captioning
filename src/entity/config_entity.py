@@ -3,6 +3,7 @@ from from_root import from_root
 import os
 from models.inception import Inception
 from src.utils.main_utils import MainUtils
+from src.configuration.s3_opearations import S3Operation
 from src.constant import *
 
 @dataclass
@@ -32,6 +33,7 @@ class DataPreprocessingConfig:
         self.TEST_IMAGE_WITH_PATH: str = os.path.join(self.DATA_PREPROCESSING_ARTIFACTS_DIR, TEST_IMAGE_WITH_PATH_NAME)
         self.EMBEDDING_MATRIX_PATH: str = os.path.join(self.DATA_PREPROCESSING_ARTIFACTS_DIR, EMBEDDING_MATRIX_FILE_NAME)
         self.WORD_TO_INDEX_PATH: str = os.path.join(self.DATA_PREPROCESSING_ARTIFACTS_DIR, WORD_TO_INDEX_NAME)
+        self.INDEX_TO_WORD_PATH: str = os.path.join(self.DATA_PREPROCESSING_ARTIFACTS_DIR, INDEX_TO_WORD_NAME)
         # self.TRAIN_IMAGE_WITH_CLEANED_DESC_PATH: str = os.path.join(self.DATA_PREPROCESSING_ARTIFACTS_DIR, TRAIN_IMAGE_NAME)
         # self.TEST_IMAGE_WITH_CLEANED_DESC_PATH: str = os.path.join(self.DATA_PREPROCESSING_ARTIFACTS_DIR, TEST_IMAGE_NAME)
         self.GLOVE_MODEL_PATH: str = os.path.join(from_root(), MODELS_DIR, GLOVE_MODEL_NAME)
@@ -53,3 +55,10 @@ class ModelPusherConfig:
     def __init__(self):
         self.S3_MODEL_KEY_PATH: str = os.path.join(MODEL_NAME)
         self.BUCKET_NAME: str = BUCKET_NAME
+
+
+class ModelPredictorConfig:
+    def __init__(self):
+        self.UTILS = MainUtils()
+        self.INCEPTION = Inception(weights=INCEPTION_WEIGHT)
+        self.S3_OPERATION = S3Operation()
