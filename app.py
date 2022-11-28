@@ -1,15 +1,10 @@
-from fastapi import FastAPI,Request, File
-from typing import Optional
+from fastapi import FastAPI, File
 from uvicorn import run as app_run
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, JSONResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from src.utils.main_utils import MainUtils
 from src.pipeline.train_pipeline import TrainPipeline
 from src.pipeline.prediction_pipeline import ModelPredictor
-from src.entity.config_entity import ModelPredictorConfig
-from src.entity.artifacts_entity import ModelTrainerArtifacts, DataPreprocessingArtifacts
+
 from src.constant import *
 
 
@@ -23,7 +18,6 @@ app.add_middleware(
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
-
     allow_headers=["*"],
 )
 
@@ -39,20 +33,15 @@ async def training():
     except Exception as e:
         return Response(f"Error Occurred! {e}")
 
-main_utils = MainUtils()
-prediction_pipeline = ModelPredictor(model_trainer_artifacts=ModelTrainerArtifacts, data_preprocessing_artifacts=DataPreprocessingArtifacts,
-                                         model_predictor_config=ModelPredictorConfig())
 
 @app.post("/predict")
 async def prediction(image_file: bytes = File(description="A file read as bytes")):
     try:
+        prediction_pipeline = ModelPredictor()
 
-        #print("chutia", image_file)
         caption = prediction_pipeline.run_pipeline(image_file)
-        # encoded_image = main_utils.encodeImageIntoBase64(image_file)
 
         result = {
-            "image": image_file,
             "caption" : caption
         }
 
