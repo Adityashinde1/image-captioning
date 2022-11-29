@@ -1,9 +1,11 @@
 artifacts
-src.egg-info
+image_captioning.egg-info
 env
+assignment
 venv
 notebooks
 demo.py
 build
 dist
 model.h5
+__pycache__
