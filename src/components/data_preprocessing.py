@@ -94,7 +94,7 @@ class DataPreprocessing:
 
 
     def load_image_name_set(self, filename) -> set:
-        logger.info("Entered the load_image_name_set methos of Data Preprocessing class")
+        logger.info("Entered the load_image_name_set method of Data Preprocessing class")
         try:
             doc = self.data_preprocessing_config.UTILS.read_txt_file(filename)
             dataset = list()
@@ -106,7 +106,7 @@ class DataPreprocessing:
                 # get the image identifier
                 identifier = line.split('.')[0]
                 dataset.append(identifier)
-            logger.info("Exited the load_image_name_set methos of Data Preprocessing class")
+            logger.info("Exited the load_image_name_set method of Data Preprocessing class")
             return set(dataset)
 
         except Exception as e:
@@ -161,11 +161,13 @@ class DataPreprocessing:
 
     # We're creating here a list of all the captions
     def create_caption_list(self, descriptions: dict) -> list:
+        logger.info("Entered the create_caption_list method of Data Preprocessing class")
         try:
             all_captions = []
             for key, val in descriptions.items():
                 for cap in val:
                     all_captions.append(cap)
+            logger.info("Exited the create_caption_list method of Data Preprocessing class")
             return all_captions
 
         except Exception as e:
@@ -173,6 +175,7 @@ class DataPreprocessing:
 
     # Considering only those words which occur at least threshold times in the corpus
     def create_corpus(self, threshold: int, captions: list) -> list:
+        logger.info("Entered the create_corpus method of Data Preprocessing class")
         try:
             word_counts = {}
             nsents = 0
@@ -181,30 +184,35 @@ class DataPreprocessing:
                 for w in sent.split(' '):
                     word_counts[w] = word_counts.get(w, 0) + 1
             vocab = [w for w in word_counts if word_counts[w] >= threshold]
+            logger.info("Exited the create_corpus method of Data Preprocessing class")
             return vocab
 
         except Exception as e:
             raise CustomException(e, sys) from e
 
     def convert_index_to_word(self, vocab: list) -> dict:
+        logger.info("Entered the convert_index_to_word method of Data Preprocessing class")
         try:
             index_to_word = {}
             ix = 1
             for w in vocab:
                 index_to_word[ix] = w
                 ix += 1
+            logger.info("Exited the convert_index_to_word method of Data Preprocessing class")
             return index_to_word
 
         except Exception as e:
             raise CustomException(e, sys) from e
 
     def convert_word_to_index(self, vocab: list) -> dict:
+        logger.info("Entered the convert_word_to_index method of Data Preprocessing class")
         try:
             word_to_index = {}
             ix = 1
             for w in vocab:
                 word_to_index[w] = ix
                 ix += 1
+            logger.info("Exited the convert_word_to_index method of Data Preprocessing class")
             return word_to_index
 
         except Exception as e:
@@ -213,10 +221,12 @@ class DataPreprocessing:
     # converting a dictionary of clean descriptions to a list of descriptions
     @staticmethod
     def to_lines(descriptions: dict) -> list:
+        logger.info("Entered the to_lines method of Data Preprocessing class")
         try:
             all_desc = list()
             for key in descriptions.keys():
                 [all_desc.append(d) for d in descriptions[key]]
+            logger.info("Exited the to_lines method of Data Preprocessing class")
             return all_desc
 
         except Exception as e:
@@ -224,14 +234,17 @@ class DataPreprocessing:
 
     # calculating the length of the description with the most words
     def max_length(self, descriptions: dict) -> int:
+        logger.info("Entered the max_length method of Data Preprocessing class")
         try:
             lines = self.to_lines(descriptions)
+            logger.info("Exited the max_length method of Data Preprocessing class")
             return max(len(d.split()) for d in lines)
 
         except Exception as e:
             raise CustomException(e, sys) from e
 
     def generate_word_vectors(self) -> dict:
+        logger.info("Entered the generate_word_vectors method of Data Preprocessing class")
         try:
             embeddings_index = {}
             self.s3_operations.download_file(bucket_name=BUCKET_NAME, output_file_path=self.data_preprocessing_config.GLOVE_MODEL_PATH, key=S3_GLOVE_MODEL_NAME)
@@ -242,12 +255,14 @@ class DataPreprocessing:
                 coefs = np.asarray(values[1:], dtype='float32')
                 embeddings_index[word] = coefs
             f.close()
+            logger.info("Exited the generate_word_vectors method of Data Preprocessing class")
             return embeddings_index
 
         except Exception as e:
             raise CustomException(e, sys) from e
 
-    def get_dense_vectors(self, embedding_dim: int, vocab_size: int, vocab: list):
+    def get_dense_vectors(self, embedding_dim: int, vocab_size: int, vocab: list) -> np.array:
+        logger.info("Entered the get_dense_vectors method of Data Preprocessing class")
         try:
             embedding_matrix = np.zeros((vocab_size, embedding_dim))
             wrd_to_idx = self.convert_word_to_index(vocab=vocab)
@@ -258,7 +273,7 @@ class DataPreprocessing:
                 if embedding_vector is not None:
                     # Words not found in the embedding index will be all zeros
                     embedding_matrix[i] = embedding_vector
-
+            logger.info("Exited the get_dense_vectors method of Data Preprocessing class")
             return embedding_matrix
 
         except Exception as e:
@@ -300,7 +315,7 @@ class DataPreprocessing:
 
             # Reading Train and Test image names from .txt file
             train_image_txt_names = self.load_image_name_set(filename=self.data_ingestion_artifacts.train_token_file_path)
-            test_image_txt_names = self.load_image_name_set(filename=self.data_ingestion_artifacts.test_token_file_path)  
+            self.load_image_name_set(filename=self.data_ingestion_artifacts.test_token_file_path)  
             logger.info("Loaded train and test image names from txt file")
 
             # Getting Train and Test imagaes from data ingestion artifacst directory
@@ -319,37 +334,43 @@ class DataPreprocessing:
 
             # Preparing the cleaned descriptions.
             prepared_train_descriptions = self.prepare_descriptions(filename=self.data_preprocessing_config.CLEANED_TRAIN_DESC_PATH, dataset=train_image_txt_names)
-            #test_descriptions = self.prepare_descriptions(filename=self.data_preprocessing_config.CLEANED_TEST_DESC_PATH, dataset=test_image_txt_names)
-            logger.info("Prepared the train and test descriptions")
+            logger.info("Prepared the train descriptions")
 
             # Saving the cleaned descriptions to the artifacts directory.
             self.data_preprocessing_config.UTILS.dump_pickle_file(output_filepath=self.data_preprocessing_config.PREPARED_TRAIN_DESC_PATH, 
                                                                                             data=prepared_train_descriptions)
             logger.info(f"Saved the train descriptions to the artifacts directory. File name - {os.path.basename(self.data_preprocessing_config.PREPARED_TRAIN_DESC_PATH)}")
 
-            # logger.info(f"Saved the test descriptions with image names to the artifacts directory. File name - {os.path.basename(self.data_preprocessing_config.TEST_IMAGE_WITH_CLEANED_DESC_PATH)}")
-
+            # Creating Train captions list
             all_train_captions = self.create_caption_list(descriptions=prepared_train_descriptions)
+            logger.info("Train captions list created")
 
+            # Creating corpus
             vocab = self.create_corpus(threshold=WORD_COUNT_THRESHOLD, captions=all_train_captions)
-            #print(vocab)
+            logger.info("Train vocab/corpus list created") 
 
+            # Creating list of words with index
             vocab_dict = self.convert_index_to_word(vocab=vocab)
             self.data_preprocessing_config.UTILS.dump_pickle_file(output_filepath=self.data_preprocessing_config.INDEX_TO_WORD_PATH, data=vocab_dict)
+            logger.info(f"Index list created and saved the pickle file to artifacts directory. File name - {os.path.basename(self.data_preprocessing_config.INDEX_TO_WORD_PATH)}")  
 
+            # Creating list of words
             word_to_index = self.convert_word_to_index(vocab=vocab)
-
             self.data_preprocessing_config.UTILS.dump_pickle_file(output_filepath=self.data_preprocessing_config.WORD_TO_INDEX_PATH, data=word_to_index)
+            logger.info(f"Created reverse index list and saved the pickle file to artifacts directory. File name - {os.path.basename(self.data_preprocessing_config.WORD_TO_INDEX_PATH)}")
 
             vocab_size = len(vocab_dict) + 1   # one for appended 0's
 
+            # Calculating the max length of the descriptions
             max_length = self.max_length(descriptions=prepared_train_descriptions)
 
+            # Getting the word embeddings
             embedding_matrix = self.get_dense_vectors(embedding_dim=EMBEDDING_DIM, vocab_size=vocab_size, vocab=vocab)
-
             self.data_preprocessing_config.UTILS.dump_pickle_file(output_filepath=self.data_preprocessing_config.EMBEDDING_MATRIX_PATH, 
                                                                                             data=embedding_matrix)
+            logger.info(f"Generated word embeddings and saved the file to artifacts directory. File name - {os.path.basename(self.data_preprocessing_config.EMBEDDING_MATRIX_PATH)}")
 
+            # Saving the data preprocessing artifacts
             data_preprocessing_artifacts = DataPreprocessingArtifacts(cleaned_train_desc_path=cleaned_train_desc_path,
                                                                         cleaned_test_desc_path=cleaned_test_desc_path,
                                                                         max_length=max_length,

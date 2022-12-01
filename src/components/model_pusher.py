@@ -42,17 +42,15 @@ class ModelPusher:
                 self.model_pusher_config.BUCKET_NAME,
                 remove=False,
             )
-
             logger.info("Uploaded best model to s3 bucket")
-            logger.info("Exited initiate_model_pusher method of ModelTrainer class")
-
 
             # Saving the model pusher artifacts
             model_pusher_artifact = ModelPusherArtifacts(
                 bucket_name=self.model_pusher_config.BUCKET_NAME,
                 s3_model_path=self.model_pusher_config.S3_MODEL_KEY_PATH,
             )
-
+            
+            logger.info("Exited initiate_model_pusher method of ModelTrainer class")
             return model_pusher_artifact
 
         except Exception as e:

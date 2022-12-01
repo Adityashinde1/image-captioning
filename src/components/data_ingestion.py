@@ -112,7 +112,7 @@ class DataIngestion:
                                                         key=S3_TEST_TOKEN_FILE_NAME)
             logger.info("got test tokens file from s3 bucket")
 
-
+            # Saving data ingestion artifacts
             data_ingestion_artifacts = DataIngestionArtifacts(image_data_dir=self.data_ingestion_config.DATA_PATH,
                                                                 train_token_file_path=train_token_path,
                                                                 test_token_file_path=test_token_path,
